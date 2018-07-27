@@ -43,6 +43,10 @@ The import scripts basically consist of the files ImportIFC.cs and MaterialAssig
 
 9. Import some IFC files!
 
+## Release
+
+Be sure to include the IFC2X3-Settings.xml +.exp and IFC4-Settings.xml + .exp, IFCEngine.dll and IfcEngineWrapper.dll into your binary directory!
+
 ![Import](https://i.imgur.com/MrLfS99.jpg)
 
 ## Contributing
