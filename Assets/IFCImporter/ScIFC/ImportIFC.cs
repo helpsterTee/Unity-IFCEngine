@@ -1,13 +1,13 @@
 ﻿#region License
 /** Copyright(c) 2017 helpsterTee (https://github.com/helpsterTee)
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
-to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 #endregion
@@ -55,10 +55,12 @@ public class ImportIFC : MonoBehaviour {
     public MaterialAssignment MaterialAssignment;
 
     private Dictionary<String, Material> classToMat = new Dictionary<string, Material>();
+    private Dictionary<Mesh, String> meshToIfcType;
 
     // Use this for initialization
     public void Init()
     {
+        meshToIfcType = new Dictionary<Mesh, string>();
         initMaterial = Resources.Load("IFCDefault", typeof(Material)) as Material;
 
         /* prepare material assignment */
@@ -72,8 +74,9 @@ public class ImportIFC : MonoBehaviour {
         }
     }
 
-    public void ImportFile(string path, string name)
+    public void ImportFile(string path, string name, bool useNamesInsteadOfTypes)
     {
+        this.useNamesInsteadOfTypes = useNamesInsteadOfTypes;
         this.StartCoroutineAsync(Import(path, name));
     }
 
@@ -130,7 +133,7 @@ public class ImportIFC : MonoBehaviour {
                     projectScale = 1/10.0f;
                 }
             }
-            
+
             yield return null;
         }
 
@@ -171,7 +174,24 @@ public class ImportIFC : MonoBehaviour {
 
             yield return Ninja.JumpToUnity;
             Mesh m = new Mesh();
-            m.name = item.ifcType;
+            meshToIfcType.Add(m, item.ifcType);
+
+            if (useNamesInsteadOfTypes)
+            {
+                if (item.name != null && item.name.Trim().Length > 0)
+                {
+                    m.name = item.name;
+                }
+                else
+                {
+                    m.name = item.ifcType;
+                }
+            }
+            else
+            {
+                m.name = item.ifcType;
+            }
+
             yield return Ninja.JumpBack;
             List<Vector3> vertices = new List<Vector3>();
             for(int i=0; i<item.verticesCount; i++)
@@ -211,7 +231,7 @@ public class ImportIFC : MonoBehaviour {
             m.RecalculateNormals();
             yield return Ninja.JumpBack;
             meshes.Add(m);
-            
+
             cnt++;
         }
 
@@ -220,14 +240,17 @@ public class ImportIFC : MonoBehaviour {
         foreach (Mesh m in meshes)
         {
             Material mat = initMaterial;
+            String meshType = null;
+
+            meshToIfcType.TryGetValue(m, out meshType);
 
             /* check if materials assigned, otherwise use init mat */
-            if (classToMat.ContainsKey(m.name))
+            if (classToMat.ContainsKey(meshType))
             {
-                classToMat.TryGetValue(m.name, out mat);
+                classToMat.TryGetValue(meshType, out mat);
             }
 
-            GameObject child = new GameObject(m.name + cnt);
+            GameObject child = new GameObject(m.name);
             child.transform.parent = go.transform;
             MeshFilter meshFilter = (MeshFilter)child.AddComponent(typeof(MeshFilter));
             meshFilter.mesh = m;
@@ -249,7 +272,7 @@ public class ImportIFC : MonoBehaviour {
         PrefabUtility.CreatePrefab("Assets/IFCGeneratedGeometry/" + name + ".prefab", go);
 
         allFinished = true;
-        
+
         // callback for external
         if (ImportFinished != null)
         {
