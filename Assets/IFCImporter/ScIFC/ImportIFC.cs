@@ -35,6 +35,7 @@ public class ImportIFC : MonoBehaviour {
 
     bool isImporting = false;
     bool allFinished = false;
+    bool useNamesInsteadOfTypes = true;
 
     List<Mesh> meshes = new List<Mesh>();
     GameObject go;
@@ -56,11 +57,13 @@ public class ImportIFC : MonoBehaviour {
 
     private Dictionary<String, Material> classToMat = new Dictionary<string, Material>();
     private Dictionary<Mesh, String> meshToIfcType;
+    private Dictionary<Mesh, List<IFCVariables.IfcVar>> meshToIfcVars;
 
     // Use this for initialization
     public void Init()
     {
         meshToIfcType = new Dictionary<Mesh, string>();
+        meshToIfcVars = new Dictionary<Mesh, List<IFCVariables.IfcVar>>();
         initMaterial = Resources.Load("IFCDefault", typeof(Material)) as Material;
 
         /* prepare material assignment */
@@ -174,6 +177,8 @@ public class ImportIFC : MonoBehaviour {
 
             yield return Ninja.JumpToUnity;
             Mesh m = new Mesh();
+
+            //process properties of ifc item
             meshToIfcType.Add(m, item.ifcType);
 
             if (useNamesInsteadOfTypes)
@@ -191,6 +196,14 @@ public class ImportIFC : MonoBehaviour {
             {
                 m.name = item.ifcType;
             }
+
+            // store additional properties
+            List<IFCVariables.IfcVar> ifcVar = new List<IFCVariables.IfcVar>();
+            ifcVar.Add(new IFCVariables.IfcVar { key = "name", value = item.name });
+            ifcVar.Add(new IFCVariables.IfcVar { key = "type", value = item.ifcType });
+            ifcVar.Add(new IFCVariables.IfcVar { key = "guid", value = item.guid });
+            ifcVar.Add(new IFCVariables.IfcVar { key = "description", value = item.description });
+            meshToIfcVars.Add(m, ifcVar);
 
             yield return Ninja.JumpBack;
             List<Vector3> vertices = new List<Vector3>();
@@ -255,10 +268,18 @@ public class ImportIFC : MonoBehaviour {
             MeshFilter meshFilter = (MeshFilter)child.AddComponent(typeof(MeshFilter));
             meshFilter.mesh = m;
             MeshRenderer renderer = child.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
-
             renderer.material = mat;
 
             child.AddComponent(typeof(SerializeMesh));
+
+            // add IFC variables
+            IFCVariables ifcVars = (IFCVariables)child.AddComponent(typeof(IFCVariables));
+            List<IFCVariables.IfcVar> mvar;
+            meshToIfcVars.TryGetValue(m, out mvar);
+            if (mvar != null)
+            {
+                ifcVars.vars = mvar.ToArray();
+            }
 
             cnt++;
             yield return null;

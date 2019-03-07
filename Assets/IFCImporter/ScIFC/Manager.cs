@@ -38,6 +38,13 @@ public class Manager : MonoBehaviour {
     {
         /* Do something */
 
+        /* show ifc properties to console for testing */
+        IFCVariables vars = go.GetComponentInChildren<IFCVariables>();
+        if (vars != null && vars.vars.Length > 0)
+        {
+            Debug.Log(vars.ToString());
+        }
+
     }
 
 	// Update is called once per frame
