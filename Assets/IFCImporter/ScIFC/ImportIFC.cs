@@ -201,6 +201,8 @@ public class ImportIFC : MonoBehaviour {
             List<IFCVariables.IfcVar> ifcVar = new List<IFCVariables.IfcVar>();
             ifcVar.Add(new IFCVariables.IfcVar { key = "name", value = item.name });
             ifcVar.Add(new IFCVariables.IfcVar { key = "type", value = item.ifcType });
+            ifcVar.Add(new IFCVariables.IfcVar { key = "guid", value = item.guid });
+            ifcVar.Add(new IFCVariables.IfcVar { key = "description", value = item.description });
             meshToIfcVars.Add(m, ifcVar);
 
             yield return Ninja.JumpBack;
