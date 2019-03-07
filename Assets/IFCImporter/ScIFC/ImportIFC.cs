@@ -35,6 +35,7 @@ public class ImportIFC : MonoBehaviour {
 
     bool isImporting = false;
     bool allFinished = false;
+    bool useNamesInsteadOfTypes = true;
 
     List<Mesh> meshes = new List<Mesh>();
     GameObject go;
