@@ -43,6 +43,9 @@ The import scripts basically consist of the files ImportIFC.cs and MaterialAssig
 
 9. Import some IFC files!
 
+10. Access common IFC properties via the IFCVariables component attached to the child gameobjects
+![properties](https://i.imgur.com/7u8V3cK.png)
+
 ## Release
 
 Be sure to include the IFC2X3-Settings.xml +.exp and IFC4-Settings.xml + .exp, IFCEngine.dll and IfcEngineWrapper.dll into your binary directory!
