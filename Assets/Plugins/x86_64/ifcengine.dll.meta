@@ -1,7 +1,5 @@
 fileFormatVersion: 2
 guid: 52626c11e4afe7542bdc93a5eb8c7917
-timeCreated: 1495119854
-licenseType: Free
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -24,6 +22,7 @@ PluginImporter:
         Exclude OSXUniversal: 0
         Exclude Win: 1
         Exclude Win64: 0
+        Exclude WindowsStoreApps: 0
   - first:
       Any: 
     second:
@@ -97,6 +96,16 @@ PluginImporter:
       enabled: 1
       settings:
         CPU: AnyCPU
+  - first:
+      Windows Store Apps: WindowsStoreApps
+    second:
+      enabled: 1
+      settings:
+        CPU: X64
+        DontProcess: false
+        PlaceholderPath: 
+        SDK: AnySDK
+        ScriptingBackend: AnyScriptingBackend
   userData: 
   assetBundleName: 
   assetBundleVariant: 

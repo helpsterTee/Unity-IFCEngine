@@ -26,7 +26,11 @@ public class Manager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         string name = "IfcOpenHouseGeoRef";
+#if UNITY_EDITOR
         string file = "Assets/IFCImporter/IFCFiles/" + name + ".ifc";
+#else
+        string file = "./"+name+".ifc";
+#endif
 
         import = GetComponentInChildren<ImportIFC>();
         import.ImportFinished += new ImportIFC.CallbackEventHandler(ImportIsFinished);
